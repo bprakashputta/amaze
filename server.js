@@ -1,34 +1,31 @@
-const express = require('express');
+const express = require("express");
+const bodyParser = require("body-parser");
 const {request, response} = require("express");
 const amaze = express();
-const helmet = require('helmet');
-const morgan = require('morgan');
-const debug = require('debug')
-const PORT = process.env.PORT || 3000;
-
-mongoose.connect('mongodb://localhost/amaze')
-    .then(()=>{
-        console.log("Connected to Amaze database");
-    })
-    .catch((err)=>{
-        console.log(err.message);
-    });
-
-
-
-const home = require('./routes/home');
 const mongoose = require("mongoose");
+// const helmet = require('helmet');
+// const morgan = require('morgan');
+const PORT = 8080;
+const users = require("./routes/users")
+amaze.use(bodyParser.urlencoded({extended: true}));
 
-amaze.use(express.json());
-amaze.use(express.urlencoded({extended: true}));
-amaze.use(express.static('public'));
-amaze.use(helmet());
-amaze.use('/', home);
-
-amaze.get('/', (request, response)=>{
-    return response.send(home);
+mongoose.connect("mongodb://localhost:27017/amaze").then(()=>{
+    console.log("Connected to MongoDB Database");
+}).catch((err)=>{
+    console.log("Ran into Error : " + err.message);
 });
 
-amaze.listen(PORT, ()=>{
-    console.log("Server is running on PORT: ", PORT);
+amaze.use(express.json());
+amaze.use('/api/users', users);
+amaze.get('/', (request, response)=>{
+    return response.send("Welcome to Amaze");
+})
+
+
+amaze.listen(PORT, (err)=>{
+    if(err){
+        console.log(err.message);
+        return;
+    }
+    console.log("Server is running on PORT ",PORT);
 });

@@ -1,74 +1,59 @@
-const mongoose = require('mongoose');
-const Joi = require('joi');
-const {json} = require("express");
-const {now} = require("mongoose");
+const mongoose = require("mongoose");
+const Joi = require("joi");
+const {model} = require("mongoose");
+JoiObjectId = require("joi-objectid")(Joi);
 
-const userschema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
         minlength: 6,
-        maxlength: 20,
-        unique: true
+        maxlength: 20
     },
-    email:{
+    email: {
         type: String,
-        required: true,
-        minlength: 10,
+        unique: true,
         maxlength: 255
     },
-    password:{
+    password: {
         type: String,
         required: true,
         minlength: 6,
-        maxlength: 255
+        maxlength: 16
     },
-    gender:{
+    gender: {
         type: String,
-        enum: ['male', 'female', 'others'],
-        required: true
     },
-    dateofbirth:{
+    date_of_birth:{
         type: Date,
-        required: true,
-        trim: true
     },
-    phonenumber:{
+    phone_number:{
         type: Number,
-        minlength: 10,
-        maxlength: 12,
-        required: true
     },
     role:{
         type: String,
-        enum: ['user', 'admin'],
-        default: "user"
+        enum: ['admin', 'user'],
+        default: 'user'
     },
-    createdAt:{
-        type: Date,
-        default: Date.now()
-    },
-    modifiedAt:{
-        type: Date,
-        default: Date.now()
-    }
+},{
+    timestamps: true
 });
 
-const User = new mongoose.model('User', userschema);
+const User = mongoose.model('User',userSchema);
 
-async function validateUser(user){
+function validateSchema(user){
     const schema = Joi.object({
-        username: Joi.string().required().min(6).max(20),
-        email: Joi.string().email().required().min(10).max(255),
-        password: Joi.string().required().min(6).max(255),
-        gender: Joi.string().required(),
-        dateofbirth: Joi.date().required(),
-        phonenumber: Joi.number().required().min(10).max(12),
-        // role: Joi.str
+        username: Joi.string().min(6).max(20).required(),
+        email: Joi.string().max(255).required().email(),
+        password: Joi.string().min(6).max(26).required(),
+        gender: Joi.string(),
+        date_of_birth: Joi.date(),
+        phone_number: Joi.number(),
+        role: Joi.string()
     });
     return schema.validate(user);
 }
 
-module.exports = User;
-module.exports = userschema;
-module.exports = validateUser;
+module.exports.userSchema = userSchema;
+module.exports.User = User;
+module.exports.validate = validateSchema;
